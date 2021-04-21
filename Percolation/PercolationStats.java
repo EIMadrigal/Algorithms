@@ -12,14 +12,16 @@ public class PercolationStats {
             throw new IllegalArgumentException("Index error");
         }
         thres = new double[trials];
-        Percolation per = new Percolation(n);
         for (int i = 0; i < trials; ++i) {
+            Percolation per = new Percolation(n);
             while (!per.percolates()) {
                 int row = StdRandom.uniform(n) + 1;
                 int col = StdRandom.uniform(n) + 1;
-                if (!per.isOpen(row, col)) {
-                    per.open(row, col);
+                while (per.isOpen(row, col)) {
+                    row = StdRandom.uniform(n) + 1;
+                    col = StdRandom.uniform(n) + 1;
                 }
+                per.open(row, col);
             }
             thres[i] = 1.0 * per.numberOfOpenSites() / (n * n);
         }
