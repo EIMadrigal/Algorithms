@@ -1,12 +1,12 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
-// TODO Backwash problem
 
 public class Percolation {
     private final int n;
     private int numberOfOpenSites;
     private boolean[][] grid;
     private final WeightedQuickUnionUF uf;
+    private final WeightedQuickUnionUF ufWithoutBottom;
 
     // creates n-by-n grid, with all sites initially blocked
     public Percolation(int n) {
@@ -15,9 +15,11 @@ public class Percolation {
         }
         grid = new boolean[n][n];
         uf = new WeightedQuickUnionUF(n * n + 2);
+        ufWithoutBottom = new WeightedQuickUnionUF(n * n + 1);
         for (int i = 0; i < n; ++i) {
             uf.union(n * n, i);
             uf.union(n * n + 1, n * n - 1 - i);
+            ufWithoutBottom.union(n * n, i);
         }
         this.n = n;
         numberOfOpenSites = 0;
@@ -34,15 +36,19 @@ public class Percolation {
             grid[row - 1][col - 1] = true;
             if (row - 2 >= 0 && isOpen(row - 1, col)) {
                 uf.union(idx, (row - 2) * n + col - 1);
+                ufWithoutBottom.union(idx, (row - 2) * n + col - 1);
             }
             if (row < n && isOpen(row + 1, col)) {
                 uf.union(idx, row * n + col - 1);
+                ufWithoutBottom.union(idx, row * n + col - 1);
             }
             if (col < n && isOpen(row, col + 1)) {
                 uf.union(idx, (row - 1) * n + col);
+                ufWithoutBottom.union(idx, (row - 1) * n + col);
             }
             if (col - 2 >= 0 && isOpen(row, col - 1)) {
                 uf.union(idx, (row - 1) * n + col - 2);
+                ufWithoutBottom.union(idx, (row - 1) * n + col - 2);
             }
         }
     }
@@ -61,7 +67,7 @@ public class Percolation {
             throw new IllegalArgumentException("Index error");
         }
         int idx = (row - 1) * n + col - 1;
-        return isOpen(row, col) && uf.find(idx) == uf.find(n * n);
+        return isOpen(row, col) && ufWithoutBottom.find(idx) == ufWithoutBottom.find(n * n);
     }
 
     // returns the number of open sites
